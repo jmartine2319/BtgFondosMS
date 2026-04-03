@@ -1,15 +1,18 @@
 package com.btg.fondos.document;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document(collection = "disponibilidad")
-public class Disponibilidad {
+@Builder
+@Document(collection = "producto")
+public class ProductoDocument {
 
     @Id
     private String id;
-    private String idSucursal;
-    private String idProducto;
+    private String nombre;
+    private String tipoProducto;
+    private Long monto;
 }

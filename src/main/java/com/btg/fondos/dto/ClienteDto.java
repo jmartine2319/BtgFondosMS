@@ -1,12 +1,9 @@
 package com.btg.fondos.dto;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@Builder
+@Data
 public class ClienteDto {
     private String id;
     private String nombre;

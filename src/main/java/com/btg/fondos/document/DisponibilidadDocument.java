@@ -4,15 +4,12 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
-
 @Data
-@Document(collection = "visitante")
-public class Visitante {
+@Document(collection = "disponibilidad")
+public class DisponibilidadDocument {
 
     @Id
     private String id;
     private String idSucursal;
-    private String idCliente;
-    private LocalDateTime fechaVisita;
+    private String idProducto;
 }

@@ -1,8 +1,8 @@
 package com.btg.fondos.service.impl;
 
-import com.btg.fondos.document.Cliente;
-import com.btg.fondos.document.Inscripcion;
-import com.btg.fondos.document.Producto;
+import com.btg.fondos.document.ClienteDocument;
+import com.btg.fondos.document.InscripcionDocument;
+import com.btg.fondos.document.ProductoDocument;
 import com.btg.fondos.dto.InscripcionDto;
 import com.btg.fondos.mapper.InscripcionMapper;
 import com.btg.fondos.models.FondosRequestDto;
@@ -37,44 +37,44 @@ public class FondosServiceImpl implements FondosService {
      */
     @Override
     public FondosResponseDto suscribirFondo(FondosRequestDto request) {
-        Cliente cliente = clienteRepository.findById(request.getIdCliente())
+        ClienteDocument clienteDocument = clienteRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        Producto producto = productoRepository.findById(request.getIdProducto())
+        ProductoDocument productoDocument = productoRepository.findById(request.getIdProducto())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        if (cliente.getSaldo().compareTo(producto.getMonto()) < 0) {
+        if (clienteDocument.getSaldo().compareTo(productoDocument.getMonto()) < 0) {
             return FondosResponseDto.builder()
-                    .mensaje("No tiene saldo disponible para vincularse al fondo " + producto.getNombre())
-                    .saldo(cliente.getSaldo())
+                    .mensaje("No tiene saldo disponible para vincularse al fondo " + productoDocument.getNombre())
+                    .saldo(clienteDocument.getSaldo())
                     .build();
         }
 
         if (inscripcionRepository.existsByIdClienteAndIdProductoAndEstado(
                 request.getIdCliente(), request.getIdProducto(), "ACTIVO")) {
             return FondosResponseDto.builder()
-                    .mensaje("Ya tiene una suscripción activa al fondo " + producto.getNombre())
-                    .saldo(cliente.getSaldo())
+                    .mensaje("Ya tiene una suscripción activa al fondo " + productoDocument.getNombre())
+                    .saldo(clienteDocument.getSaldo())
                     .build();
         }
 
-        cliente.setSaldo(cliente.getSaldo()-producto.getMonto());
-        clienteRepository.save(cliente);
+        clienteDocument.setSaldo(clienteDocument.getSaldo()- productoDocument.getMonto());
+        clienteRepository.save(clienteDocument);
 
-        Inscripcion inscripcion = new Inscripcion();
+        InscripcionDocument inscripcion = new InscripcionDocument();
         inscripcion.setIdCliente(request.getIdCliente());
         inscripcion.setIdProducto(request.getIdProducto());
         inscripcion.setEstado("ACTIVO");
         inscripcion.setFechaApertura(LocalDate.now());
-        inscripcion.setMonto(producto.getMonto());
+        inscripcion.setMonto(productoDocument.getMonto());
         inscripcionRepository.save(inscripcion);
 
-        enviarNotificacion(cliente, producto);
+        enviarNotificacion(clienteDocument, productoDocument);
 
         return FondosResponseDto.builder()
-                .mensaje("Suscripción al fondo " + producto.getNombre() + " realizada exitosamente")
-                .saldo(cliente.getSaldo())
-                .transaccion(inscripcion)
+                .mensaje("Suscripción al fondo " + productoDocument.getNombre() + " realizada exitosamente")
+                .saldo(clienteDocument.getSaldo())
+                .transaccion(inscripcionMapper.toDto(inscripcion))
                 .build();
     }
 
@@ -85,29 +85,29 @@ public class FondosServiceImpl implements FondosService {
      */
     @Override
     public FondosResponseDto cancelarSuscripcion(FondosRequestDto request) {
-        Cliente cliente = clienteRepository.findById(request.getIdCliente())
+        ClienteDocument clienteDocument = clienteRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        Producto producto = productoRepository.findById(request.getIdProducto())
+        ProductoDocument productoDocument = productoRepository.findById(request.getIdProducto())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        Inscripcion inscripcion = inscripcionRepository
+        InscripcionDocument inscripcion = inscripcionRepository
                 .findByIdClienteAndIdProductoAndEstado(
                         request.getIdCliente(), request.getIdProducto(), "ACTIVO")
                 .orElseThrow(() -> new RuntimeException(
-                        "No tiene suscripción activa al fondo " + producto.getNombre()));
+                        "No tiene suscripción activa al fondo " + productoDocument.getNombre()));
 
-        cliente.setSaldo(cliente.getSaldo()+inscripcion.getMonto());
-        clienteRepository.save(cliente);
+        clienteDocument.setSaldo(clienteDocument.getSaldo()+inscripcion.getMonto());
+        clienteRepository.save(clienteDocument);
 
         inscripcion.setEstado("CANCELADO");
         inscripcion.setFechaCancelacion(LocalDate.now());
         inscripcionRepository.save(inscripcion);
 
         return FondosResponseDto.builder()
-                .mensaje("Suscripción al fondo " + producto.getNombre() + " cancelada. Monto retornado: COP $" + inscripcion.getMonto())
-                .saldo(cliente.getSaldo())
-                .transaccion(inscripcion)
+                .mensaje("Suscripción al fondo " + productoDocument.getNombre() + " cancelada. Monto retornado: COP $" + inscripcion.getMonto())
+                .saldo(clienteDocument.getSaldo())
+                .transaccion(inscripcionMapper.toDto(inscripcion))
                 .build();
     }
 
@@ -118,7 +118,7 @@ public class FondosServiceImpl implements FondosService {
      */
     @Override
     public List<InscripcionDto> consultarTransacciones(String idCliente) {
-        List<Inscripcion> listaIns= inscripcionRepository.findByIdCliente(idCliente);
+        List<InscripcionDocument> listaIns= inscripcionRepository.findByIdCliente(idCliente);
         List<InscripcionDto> listaDto = new ArrayList<>();
         listaDto=listaIns.stream().map(inscripcionMapper::toDto).collect(Collectors.toList());
         return listaDto;
@@ -126,15 +126,15 @@ public class FondosServiceImpl implements FondosService {
 
     /**
      * Metodo para enviar notificacion
-     * @param cliente cliente a enviar notificacion
-     * @param producto producto del cliente a notificar
+     * @param clienteDocument cliente a enviar notificacion
+     * @param productoDocument producto del cliente a notificar
      */
-    private void enviarNotificacion(Cliente cliente, Producto producto) {
-        String tipo = cliente.getTipoNotificacion();
+    private void enviarNotificacion(ClienteDocument clienteDocument, ProductoDocument productoDocument) {
+        String tipo = clienteDocument.getTipoNotificacion();
         if ("EMAIL".equalsIgnoreCase(tipo)) {
-            log.info("[EMAIL] Para: {} | Suscripción exitosa al fondo: {}", cliente.getEmail(), producto.getNombre());
+            log.info("[EMAIL] Para: {} | Suscripción exitosa al fondo: {}", clienteDocument.getEmail(), productoDocument.getNombre());
         } else if ("SMS".equalsIgnoreCase(tipo)) {
-            log.info("[SMS] Para: {} | Suscripción exitosa al fondo: {}", cliente.getTelefono(), producto.getNombre());
+            log.info("[SMS] Para: {} | Suscripción exitosa al fondo: {}", clienteDocument.getTelefono(), productoDocument.getNombre());
         }
     }
 }

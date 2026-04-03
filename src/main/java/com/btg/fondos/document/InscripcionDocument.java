@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @Document(collection = "inscripcion")
-public class Inscripcion {
+public class InscripcionDocument {
 
     @Id
     private String id;

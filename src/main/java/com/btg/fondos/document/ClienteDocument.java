@@ -7,12 +7,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Builder
-@Document(collection = "producto")
-public class Producto {
+@Document(collection = "cliente")
+public class ClienteDocument {
 
     @Id
     private String id;
     private String nombre;
-    private String tipoProducto;
-    private Long monto;
+    private String apellido;
+    private String ciudad;
+    private Long saldo;
+    private String tipoNotificacion; // EMAIL o SMS
+    private String email;
+    private String telefono;
 }

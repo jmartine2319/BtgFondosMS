@@ -1,6 +1,5 @@
 package com.btg.fondos.controller;
 
-import com.btg.fondos.document.Inscripcion;
 import com.btg.fondos.dto.InscripcionDto;
 import com.btg.fondos.models.FondosRequestDto;
 import com.btg.fondos.models.FondosResponseDto;
@@ -11,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller para las operaciones realizadas a fondos
+ */
 @RestController
 @RequestMapping("/fondos")
 @RequiredArgsConstructor

@@ -4,7 +4,9 @@ import com.btg.fondos.document.ClienteDocument;
 import com.btg.fondos.document.InscripcionDocument;
 import com.btg.fondos.document.ProductoDocument;
 import com.btg.fondos.dto.InscripcionDto;
+import com.btg.fondos.dto.ProductoDto;
 import com.btg.fondos.mapper.InscripcionMapper;
+import com.btg.fondos.mapper.ProductoMapper;
 import com.btg.fondos.models.FondosRequestDto;
 import com.btg.fondos.models.FondosResponseDto;
 import com.btg.fondos.repository.ClienteRepository;
@@ -29,6 +31,7 @@ public class FondosServiceImpl implements FondosService {
     private final ProductoRepository productoRepository;
     private final InscripcionRepository inscripcionRepository;
     private final InscripcionMapper inscripcionMapper;
+    private final ProductoMapper productoMapper;
 
     /**
      * Metodo para suscribir un fondo a un cliente
@@ -136,5 +139,14 @@ public class FondosServiceImpl implements FondosService {
         } else if ("SMS".equalsIgnoreCase(tipo)) {
             log.info("[SMS] Para: {} | Suscripción exitosa al fondo: {}", clienteDocument.getTelefono(), productoDocument.getNombre());
         }
+    }
+
+    /**
+     * Metodo para consultar todos los productos
+     * @return lista de productos registrados
+     */
+    public List<ProductoDto> consultarProductos(){
+        List<ProductoDocument> productos = productoRepository.findAll();
+        return productos.stream().map(productoMapper::toDto).collect(Collectors.toList());
     }
 }

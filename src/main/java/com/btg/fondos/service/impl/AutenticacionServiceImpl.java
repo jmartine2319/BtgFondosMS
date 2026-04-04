@@ -27,7 +27,7 @@ public class AutenticacionServiceImpl implements AutenticacionService {
         UsuarioDocument usuario = usuarioRepository.findByUsername(request.getUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!request.getClave().equals(usuario.getPassword())) {
+        if (!passwordEncoder.matches(request.getClave(), usuario.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
 

@@ -8,6 +8,7 @@ import com.btg.fondos.repository.ClienteRepository;
 import com.btg.fondos.repository.ProductoRepository;
 import com.btg.fondos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,12 @@ public class DataInitializer implements CommandLineRunner {
     private final ProductoRepository productoRepository;
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
+
+    @Value("${ADMIN_USERNAME:julian}")
+    private String adminUsername;
+
+    @Value("${ADMIN_PASSWORD:123456}")
+    private String adminPassword;
 
     @Override
     public void run(String... args) {
@@ -50,8 +57,8 @@ public class DataInitializer implements CommandLineRunner {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             UsuarioDocument usuarioDocument = UsuarioDocument.builder()
                     .id("1")
-                    .password(passwordEncoder.encode("123456"))
-                    .username("julian")
+                    .password(passwordEncoder.encode(adminPassword))
+                    .username(adminUsername)
                     .rol("admin").build();
             usuarioRepository.save(usuarioDocument);
         }

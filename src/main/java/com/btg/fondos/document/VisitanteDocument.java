@@ -6,6 +6,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
+/**
+ * Documento mongo para consultar visitantes que tiene una sucursal
+ */
 @Data
 @Document(collection = "visitante")
 public class VisitanteDocument {

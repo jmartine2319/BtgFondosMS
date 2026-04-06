@@ -1,7 +1,31 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Btg Fondos MS - ECS Fargate Deployment
 
+Parameters:
+  AdminUsername:
+    Type: String
+    Default: julian
+  AdminPassword:
+    Type: String
+    NoEcho: true
+    Default: 123456
+
 Resources:
+
+  # ---------------- SSM Parameters ----------------
+  SsmAdminUsername:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /btg/admin/username
+      Type: String
+      Value: !Ref AdminUsername
+
+  SsmAdminPassword:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /btg/admin/password
+      Type: String
+      Value: !Ref AdminPassword
 
   # ---------------- VPC ----------------
   VPC:
@@ -136,6 +160,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
 
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
@@ -155,6 +180,11 @@ Resources:
           Environment:
             - Name: SPRING_DATA_MONGODB_URI
               Value: "mongodb+srv://jmartinezopg_db_user:a8wOFjzSALWqcRx7@heisenberg.qo0tqag.mongodb.net/BTG?appName=heisenberg"
+          Secrets:
+            - Name: ADMIN_USERNAME
+              ValueFrom: !Sub "arn:aws:ssm:us-east-1:${AWS::AccountId}:parameter/btg/admin/username"
+            - Name: ADMIN_PASSWORD
+              ValueFrom: !Sub "arn:aws:ssm:us-east-1:${AWS::AccountId}:parameter/btg/admin/password"
           LogConfiguration:
             LogDriver: awslogs
             Options:

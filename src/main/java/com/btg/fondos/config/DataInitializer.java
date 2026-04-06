@@ -24,10 +24,10 @@ public class DataInitializer implements CommandLineRunner {
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
 
-    @Value("${ADMIN_USERNAME:julian}")
+    @Value("${ADMIN_USERNAME:}")
     private String adminUsername;
 
-    @Value("${ADMIN_PASSWORD:123456}")
+    @Value("${ADMIN_PASSWORD:}")
     private String adminPassword;
 
     @Override
